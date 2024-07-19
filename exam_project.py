@@ -110,9 +110,6 @@ st.pyplot(fig)
 
 
 
-
-
-
 # Streamlit app
 st.title('Price Distribution Analysis')
 
@@ -122,6 +119,8 @@ options = st.sidebar.multiselect(
     ['Original', 'Mean', 'Median'],
     default=['Original']  # Default selection
 )
+
+
 
 # Create histograms
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -136,17 +135,32 @@ if 'Mean' in options:
 if 'Median' in options:
     ax.hist(df['Price_median'], bins=10, alpha=0.5, label='Median', edgecolor='black')
 
-# Add labels and title
 ax.set_xlabel('Prices')
 ax.set_ylabel('Frequency')
 ax.set_title('Comparison of Selected Histograms')
 ax.legend(loc='upper right')
 
-# Display the plot in Streamlit
 st.pyplot(fig)
 
 
 
+
+st.title("Category, Platforms, and Completion Rate Bar Chart")
+
+# Grouped Bar Chart
+plt.figure(figsize=(14, 7))
+sns.set(style="whitegrid")
+
+# Create the bar plot
+bar_plot = sns.barplot(x="Category", y="Completion_Rate (%)", hue="Platform", data=df, palette="muted")
+
+# Add labels and title
+plt.xlabel('Category')
+plt.ylabel('Completion Rate (%)')
+plt.title('Completion Rate by Category and Platform')
+
+# Display the plot in Streamlit
+st.pyplot(plt)
 
 
 platform_counts1 = df['Platform'].value_counts()
@@ -216,19 +230,6 @@ st.pyplot(g.fig)
 
 
 
-
-# Side bar
-add_selectbox = st.sidebar.selectbox(
-    "How would you like to see your data?",
-    ("", "Home phone", "Mobile phone")
-)
-
-# Using "with" notation
-with st.sidebar:
-    add_radio = st.radio(
-        "Choose a shipping method",
-        ("Standard (5-15 days)", "Express (2-5 days)")
-    )
 
 st.title('Showing selected information')
 st.sidebar.title('User Inputs')
