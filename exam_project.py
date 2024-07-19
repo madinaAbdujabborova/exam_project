@@ -3,6 +3,7 @@ import seaborn as sns
 import streamlit as st
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
+from io import StringIO
 
 
 st.write("# *Online Courses* ")
@@ -37,8 +38,19 @@ st.button("Data Frame", on_click=toggle_dataframe)
 if st.session_state.show_dataframe:
     st.write(df)
 
-# Course_nameni nanlarini to'ldirish
+#df(info())
+def get_df_info(df):
+    buffer = StringIO()
+    df.info(buf=buffer)
+    s = buffer.getvalue()
+    return s
 
+st.title("DataFrame Information")
+
+df_info = get_df_info(df)
+st.text(df_info)
+
+# Course_nameni nanlarini to'ldirish
 course_id = df["Course_Name"].to_list()
 for i in range(len(course_id)):
     if course_id[i] != str:
@@ -225,9 +237,18 @@ g.fig.suptitle("Duration hours for different fields!", y=1.08)
 for ax in g.axes.flatten():
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
 
-# Display the plot in Streamlit
 st.pyplot(g.fig)
 
+
+# Create the violin plot
+st.title("Category vs Rating Violin Plot")
+
+plt.figure(figsize=(12, 6))
+sns.violinplot(data=df, x="Category", y="Rating (out of 5)")
+plt.xticks(rotation=45)
+plt.title('Violin Plot of Ratings by Category')
+
+st.pyplot(plt)
 
 
 
@@ -240,33 +261,22 @@ chart_type = st.sidebar.selectbox('Select chart type', ['Bar Chart', 'Line Chart
 # User input for selecting the data columns to display
 selected_columns = st.sidebar.multiselect(
     'Select columns to display', 
-    ['Category', 'Duration (hours)', 'Enrolled_Students', 'Completion_Rate (%)', 'Platform', 'Price ($)', 'Rating (out of 5)'], 
+    ['Category', 'Duration (hours)', 'Enrolled_Students', 'Completion_Rate (%)', 'Platform', 'Price ($)', 'Rating (out of 5)', "CompletionRate_mean", "CompletionRate_median", "Enrolled_mean", "Enrolled_median", "DurationHour_mean", "DurationHour_median", "labeled_Category", "labeled_Platform", "Platform_mean(Price)"], 
     default=['Duration (hours)', 'Enrolled_Students']
 )
 
-overlay_chart = st.sidebar.checkbox('Overlay Charts')
-
-# Check if any columns are selected
 if selected_columns:
-    # Group by 'Platform' and calculate the mean for the selected columns
-    grouped_df = df.groupby("Platform")[selected_columns].mean()
+    grouped_df = df.groupby("Category")[selected_columns].mean()
 
-    st.write('Grouped and averaged data by Platform:')
+    st.write('Grouped and averaged data by Category:')
     st.dataframe(grouped_df)
 
-    if overlay_chart:
-        st.write("Overlay Chart")
-        for col in selected_columns:
-            st.line_chart(grouped_df[col], use_container_width=True)
-            st.bar_chart(grouped_df[col], use_container_width=True)
-    else:
-        if chart_type == 'Bar Chart':
-            st.bar_chart(grouped_df)
-        elif chart_type == 'Line Chart':
-            st.line_chart(grouped_df)
+    if chart_type == 'Bar Chart':
+        st.bar_chart(grouped_df)
+    elif chart_type == 'Line Chart':
+        st.line_chart(grouped_df)
 else:
     st.write("Please select at least one column to display.")
-
 
 
 # Heat map
